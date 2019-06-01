@@ -1,0 +1,40 @@
+image: gcc
+
+build:
+  stage: build
+  before_script:
+    - apt update && apt -y install cmake make doxygen
+  script:
+    - mkdir -p build
+    - cd build
+    - cmake -DCMAKE_INSTALL_PREFIX=install -DBUILD_TEST=ON ..
+    - make -j
+  cache:
+    paths:
+      - build
+
+test:
+  stage: test
+  before_script:
+    - apt update && apt -y install cmake
+  script:
+    - cd build
+    - ctest -R TestPass
+  cache:
+    paths:
+      - build
+
+deploy:
+  stage: deploy
+  cache:
+    paths:
+      - build
+  before_script:
+    - apt update && apt -y install cmake
+  script:
+    - cd build
+    - make -j install
+  artifacts:
+    paths:
+      - build/install
+    expire_in: 1 day
